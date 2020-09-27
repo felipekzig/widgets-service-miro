@@ -5,12 +5,18 @@ import java.util.UUID;
 
 import com.felipekzig.widget.domain.vo.Coordinates;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 
 @Getter
 @Builder(builderClassName = "WidgetBuilder")
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class Widget {
 
     private UUID id;

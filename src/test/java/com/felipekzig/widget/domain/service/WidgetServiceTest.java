@@ -122,7 +122,7 @@ public class WidgetServiceTest {
     void givenPageAndSize_whenGetAll_thenReturnPage() {
         int page = 1;
         int size = 10;
-        when(repo.count()).thenReturn(0);
+        when(repo.count()).thenReturn(0L);
         when(repo.list(null, null, page, size))
                 .thenReturn(new WidgetRepository.Page(Collections.emptyList(), page, size, 0));
 
