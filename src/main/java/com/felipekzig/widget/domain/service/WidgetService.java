@@ -50,10 +50,6 @@ public class WidgetService {
         return getAll(null, null, page, size);
     }
 
-    public Page getAll() {
-        return getAll(null, null, null, null);
-    }
-
     private Widget save(Widget widget) {
         synchronized (repository) {
             if (widget.getZIndex() == null) {
