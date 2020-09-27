@@ -48,12 +48,6 @@ public class WidgetController {
     @GetMapping("/widgets")
     public ResponseEntity<WidgetRepository.Page> list(@RequestParam("page") Integer page,
             @RequestParam("size") Integer size) {
-        if (size == null) {
-            size = 10;
-        }
-        if (page == null) {
-            page = 1;
-        }
         return ResponseEntity.ok(service.getAll(page, size));
     }
 

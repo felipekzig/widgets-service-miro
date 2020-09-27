@@ -59,17 +59,22 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     }
 
     @Override
-    public Page list(Coordinates bottomLeft, Coordinates topRight, Integer page, Integer widgetsPerPage) {
+    public Page list(Coordinates bottomLeft, Coordinates topRight, Integer page, Integer size) {
+        if (page == null)
+            page = 1;
+        if (size == null)
+            size = 10;
+
         // @formatter:off
         List<Widget> results = database.values().parallelStream()
             .filter(w -> w.isInsideSquare(bottomLeft, topRight))
             .sorted((w1, w2) -> w1.getZIndex().compareTo(w2.getZIndex()))
-            .skip((page - 1) * widgetsPerPage)
-            .limit(widgetsPerPage)
+            .skip((page - 1) * size)
+            .limit(size)
             .collect(Collectors.toList());
         // @formatter:on
 
-        return new Page(results, page, widgetsPerPage, count());
+        return new Page(results, page, size, count());
     }
 
     @Override
