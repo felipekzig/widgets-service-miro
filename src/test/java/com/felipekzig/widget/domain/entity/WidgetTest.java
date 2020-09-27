@@ -1,9 +1,11 @@
 package com.felipekzig.widget.domain.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -106,6 +108,25 @@ public class WidgetTest {
         assertThrows(NullPointerException.class, () -> {
             Widget.builder().coords(new Coordinates(10, 10)).width(200).height(null).zIndex(10).build();
         });
+
+    }
+
+    @Test
+    void givenAWidgetWithinSquare_whenCheckIfInside_thenReturnTrue() {
+        Coordinates c1 = new Coordinates(0, 0);
+        Coordinates c2 = new Coordinates(100, 100);
+
+        Widget widget = Widget.builder().coords(new Coordinates(50, 50)).width(100).height(100).zIndex(1).build();
+        assertTrue(widget.isInsideSquare(c1, c2));
+    }
+
+    @Test
+    void givenAWidgetNotWithinSquare_whenCheckIfInside_thenReturnFalse() {
+        Coordinates c1 = new Coordinates(20, 20);
+        Coordinates c2 = new Coordinates(100, 100);
+
+        Widget widget = Widget.builder().coords(new Coordinates(50, 50)).width(100).height(100).zIndex(1).build();
+        assertFalse(widget.isInsideSquare(c1, c2));
     }
 
 }

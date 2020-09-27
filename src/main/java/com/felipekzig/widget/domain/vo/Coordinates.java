@@ -11,6 +11,13 @@ public class Coordinates implements Comparable<Coordinates> {
     public int compareTo(Coordinates o) {
         if (o == null)
             return 0;
-        return x == o.x ? y.compareTo(o.y) : x.compareTo(o.x);
+
+        if (x.compareTo(o.x) == 0 && y.compareTo(o.y) == 0) {
+            return 0;
+        } else if (x.compareTo(o.x) > 0 && y.compareTo(o.y) > 0) {
+            return 1;
+        } else {
+            return x == o.x ? y.compareTo(o.y) : x.compareTo(o.x);
+        }
     }
 }

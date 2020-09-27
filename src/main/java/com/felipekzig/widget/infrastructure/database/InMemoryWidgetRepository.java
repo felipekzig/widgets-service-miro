@@ -1,8 +1,10 @@
 package com.felipekzig.widget.infrastructure.database;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -62,14 +64,7 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     public Page list(Coordinates bottomLeft, Coordinates topRight, Integer page, Integer widgetsPerPage) {
         // @formatter:off
         List<Widget> results = list()
-            .filter(widget -> {
-                Coordinates center = widget.getCoords();
-                Coordinates top = new Coordinates(center.getX() + widget.getWidth() / 2,
-                        center.getY() + widget.getHeight() / 2);
-                Coordinates bottom = new Coordinates(top.getX() - widget.getWidth(), top.getY() - widget.getHeight());
-
-                return bottom.compareTo(bottomLeft) >= 0 && top.compareTo(topRight) <= 0;
-            })
+            .filter(w -> w.isInsideSquare(bottomLeft, topRight))
             .skip((page - 1) * widgetsPerPage)
             .limit(widgetsPerPage)
             .collect(Collectors.toList());

@@ -53,6 +53,13 @@ public class Widget {
         modifiedAt = Instant.now();
     }
 
+    public boolean isInsideSquare(Coordinates bottomLeft, Coordinates topRight) {
+        Coordinates bottom = new Coordinates(getCoords().getX() - getWidth() / 2, getCoords().getY() - getHeight() / 2);
+        Coordinates top = new Coordinates(getCoords().getX() + getWidth() / 2, getCoords().getY() + getHeight() / 2);
+
+        return bottom.compareTo(bottomLeft) >= 0 && top.compareTo(topRight) <= 0;
+    }
+
     public static class WidgetBuilder {
         private Instant modifiedAt = Instant.now();
     }
