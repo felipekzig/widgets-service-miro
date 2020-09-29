@@ -1,4 +1,4 @@
-package com.felipekzig.widget.infrastructure.controller;
+package com.felipekzig.widget.infrastructure.dto;
 
 import java.time.Instant;
 import java.util.UUID;
