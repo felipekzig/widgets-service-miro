@@ -1,8 +1,14 @@
 package com.felipekzig.widget.domain.vo;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Value
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
 public class Coordinates implements Comparable<Coordinates> {
     private Integer x;
     private Integer y;

@@ -8,8 +8,7 @@ export default function () {
         coords: {
             x: 10,
             y: 10
-        },
-        zIndex: 4
+        }
     });
 
     var params = {

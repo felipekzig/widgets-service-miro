@@ -38,7 +38,7 @@ public interface WidgetRepository {
 
     Optional<Widget> getForegroundWidget();
 
-    Integer count();
+    Long count();
 
     WidgetRepository.Page list(Coordinates bottomLeft, Coordinates topRight, Integer page, Integer widgetsPerPage);
 

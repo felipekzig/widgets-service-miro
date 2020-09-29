@@ -3,16 +3,30 @@ package com.felipekzig.widget.domain.entity;
 import java.time.Instant;
 import java.util.UUID;
 
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import com.felipekzig.widget.domain.vo.Coordinates;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+@Entity
+@Table(name = "widgets")
 @Getter
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder(builderClassName = "WidgetBuilder")
 public class Widget {
 
+    @Id
     private UUID id;
 
     @NonNull
@@ -22,6 +36,7 @@ public class Widget {
     private Integer height;
 
     @NonNull
+    @Embedded
     private Coordinates coords;
 
     private Integer zIndex;

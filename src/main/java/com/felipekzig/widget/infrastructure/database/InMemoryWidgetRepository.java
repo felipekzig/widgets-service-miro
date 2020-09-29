@@ -84,7 +84,7 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     }
 
     @Override
-    public Integer count() {
-        return database.values().size();
+    public Long count() {
+        return Long.valueOf(database.values().size());
     }
 }
