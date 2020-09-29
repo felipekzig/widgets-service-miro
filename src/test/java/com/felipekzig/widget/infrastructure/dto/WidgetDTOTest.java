@@ -1,4 +1,4 @@
-package com.felipekzig.widget.infrastructure.controller;
+package com.felipekzig.widget.infrastructure.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

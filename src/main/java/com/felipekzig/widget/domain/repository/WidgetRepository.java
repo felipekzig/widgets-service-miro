@@ -8,20 +8,21 @@ import java.util.stream.Stream;
 import com.felipekzig.widget.domain.entity.Widget;
 import com.felipekzig.widget.domain.vo.Coordinates;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Value;
 
 public interface WidgetRepository {
 
-    @Value
+    @Getter
+    @AllArgsConstructor
     public static class Page {
-        List<Widget> widgets;
-        Integer page;
-        Integer size;
-        long totalItems;
+        private List<Widget> widgets;
+        private Integer page;
+        private Integer size;
+        private long totalItems;
 
         @Getter(lazy = true)
-        long totalPages = calculateTotalPages();
+        private final long totalPages = calculateTotalPages();
 
         private long calculateTotalPages() {
             return (long) Math.ceil(totalItems / size);
