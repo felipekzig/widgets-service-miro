@@ -1,10 +1,10 @@
 package com.felipekzig.widget.infrastructure.database;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
 import com.felipekzig.widget.domain.entity.Widget;
@@ -22,6 +22,9 @@ public class SqlWidgetRepository implements WidgetRepository {
 
     private JpaWidgetRepository jpaRepository;
 
+    private static final String ZINDEX_FIELD = "zIndex";
+    private static final String COORDS_FIELD = "coords";
+
     public SqlWidgetRepository(JpaWidgetRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
@@ -38,7 +41,7 @@ public class SqlWidgetRepository implements WidgetRepository {
 
     @Override
     public Optional<Widget> getByZIndex(Integer zIndex) {
-        return jpaRepository.findByZIndex(zIndex);
+        return jpaRepository.findByzIndex(zIndex);
     }
 
     @Override
@@ -48,7 +51,16 @@ public class SqlWidgetRepository implements WidgetRepository {
 
     @Override
     public Optional<Widget> getForegroundWidget() {
-        return jpaRepository.findFirstByOrderByZIndexDesc();
+        // @formatter:off
+        Specification<Widget> spec = Specification
+            .where((root, query, builder) -> {
+                query.orderBy(builder.desc(root.get(ZINDEX_FIELD)));
+                return null;
+            });
+        // @formatter:on
+
+        org.springframework.data.domain.Page<Widget> jpaPage = jpaRepository.findAll(spec, PageRequest.of(0, 1));
+        return jpaPage.get().findFirst();
     }
 
     @Override
@@ -60,36 +72,42 @@ public class SqlWidgetRepository implements WidgetRepository {
     public Page list(Coordinates bottomLeft, Coordinates topRight, Integer page, Integer size) {
         // @formatter:off
         Specification<Widget> spec = Specification
-            .where(greaterThanOrEqualToCoord(bottomLeft))
-            .and(lessThanOrEqualToCoord(topRight))
+            .where(bottomLeft == null ? null : greaterThanOrEqualToCoord(bottomLeft))
+            .and(topRight == null ? null : lessThanOrEqualToCoord(topRight))
             .and((root, query, builder) -> {
-                query.orderBy(builder.asc(root.get("zIndex")));
+                query.orderBy(builder.asc(root.get(ZINDEX_FIELD)));
                 return null;
             });
         // @formatter:on
 
-        List<Widget> widgets = jpaRepository.search(spec, PageRequest.of(page, size));
-        return new Page(widgets, page, size, widgets.size());
+        org.springframework.data.domain.Page<Widget> jpaPage = jpaRepository.findAll(spec,
+                PageRequest.of(page - 1, size));
+
+        return new Page(jpaPage.getContent(), page, size, jpaPage.getTotalElements());
     }
 
     @Override
     public Stream<Widget> getWidgetsWithZIndexGreaterThanOrEqualTo(Integer zIndex) {
-        return jpaRepository.findByZIndexGreaterThanOrEqualTo(zIndex).stream();
+        // @formatter:off
+        Specification<Widget> spec = Specification
+            .where((root, query, builder) -> builder.greaterThanOrEqualTo(root.get(ZINDEX_FIELD), zIndex));
+        // @formatter:on
+        return jpaRepository.findAll(spec).stream();
     }
 
     // JPA Specs for filtering
     private static Specification<Widget> greaterThanOrEqualToCoord(Coordinates coord) {
         return (root, query, builder) -> {
-            Predicate predicateX = builder.greaterThanOrEqualTo(root.get("coords").get("x"), coord.getX());
-            Predicate predicateY = builder.greaterThanOrEqualTo(root.get("coords").get("y"), coord.getY());
+            Predicate predicateX = builder.greaterThanOrEqualTo(root.get(COORDS_FIELD).get("x"), coord.getX());
+            Predicate predicateY = builder.greaterThanOrEqualTo(root.get(COORDS_FIELD).get("y"), coord.getY());
             return builder.and(predicateX, predicateY);
         };
     }
 
     private static Specification<Widget> lessThanOrEqualToCoord(Coordinates coord) {
         return (root, query, builder) -> {
-            Predicate predicateX = builder.lessThanOrEqualTo(root.get("coords").get("x"), coord.getX());
-            Predicate predicateY = builder.lessThanOrEqualTo(root.get("coords").get("y"), coord.getY());
+            Predicate predicateX = builder.lessThanOrEqualTo(root.get(COORDS_FIELD).get("x"), coord.getX());
+            Predicate predicateY = builder.lessThanOrEqualTo(root.get(COORDS_FIELD).get("y"), coord.getY());
             return builder.and(predicateX, predicateY);
         };
     }

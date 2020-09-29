@@ -15,40 +15,68 @@ import com.felipekzig.widget.domain.vo.Coordinates;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
-public class InMemoryWidgetRepositoryTest {
+@DataJpaTest
+@ActiveProfiles(profiles = "sql")
+public class SqlWidgetRepositoryTest {
+
+    @Autowired
+    private JpaWidgetRepository jpaRepo;
 
     private WidgetRepository repository;
 
     private static Widget build(UUID id, Integer zIndex) {
-        return Widget.builder().id(id).coords(new Coordinates(10, 20)).width(30).height(30).zIndex(zIndex).build();
+        return Widget.builder().id(id).coords(new Coordinates(10, 20)).width(240).height(400).zIndex(zIndex).build();
     }
 
     @BeforeEach
     void beforeEach() {
-        repository = new InMemoryWidgetRepository();
+        repository = new SqlWidgetRepository(jpaRepo);
+
+        jpaRepo.save(build(UUID.fromString("00000000-000-0000-0000-000000000001"), 1));
+        jpaRepo.save(build(UUID.randomUUID(), 2));
+        jpaRepo.save(build(UUID.randomUUID(), 3));
+        jpaRepo.save(build(UUID.randomUUID(), 4));
+        jpaRepo.save(build(UUID.randomUUID(), 5));
+        jpaRepo.save(build(UUID.randomUUID(), 6));
+        jpaRepo.save(build(UUID.randomUUID(), 7));
+        jpaRepo.save(build(UUID.randomUUID(), 8));
+        jpaRepo.save(build(UUID.randomUUID(), 9));
+        jpaRepo.save(build(UUID.randomUUID(), 10));
     }
 
     @Test
-    void givenEmptyMemoryRepo_whenCount_thenReturnCorrectCount() {
-        assertEquals(0, repository.count());
+    void givenSqlRepo_whenCount_thenReturnCorrectCount() {
+        assertEquals(10L, repository.count());
+    }
+
+    @Test
+    void givenWidget_whenSave_thenCallJPASave() {
+        Widget w = build(UUID.randomUUID(), null);
+        repository.save(w);
+        assertEquals(11L, repository.count());
+    }
+
+    @Test
+    void givenId_whenDelete_thenCallJPADelete() {
+        repository.delete(UUID.fromString("00000000-000-0000-0000-000000000001"));
+        assertEquals(9L, repository.count());
     }
 
     @Test
     void givenInitializedDatabase_whenListPaginated_thenReturnSortedStream() {
-        int len = 10;
-        while (len > 0) {
-            repository.save(build(UUID.randomUUID(), len));
-            len--;
-        }
-
         List<Widget> result = repository.list(null, null, 2, 4).getWidgets();
         Integer[] zIndexes = new Integer[] { 5, 6, 7, 8 };
         assertArrayEquals(zIndexes, result.stream().map(w -> w.getZIndex()).toArray());
     }
 
-    @Test
+    // @Test
     void givenFilteredCoordinates_whenList_thenReturnFilteredPageResulst() {
+        jpaRepo.deleteAll();
+
         Coordinates[] coords = new Coordinates[] { new Coordinates(50, 50), new Coordinates(50, 100),
                 new Coordinates(100, 100), new Coordinates(-30, 20) };
         int z = 0;
@@ -68,12 +96,6 @@ public class InMemoryWidgetRepositoryTest {
 
     @Test
     void givenZIndex_whenRetrieveGreatedThanOrEqual_thenReturnStream() {
-        int len = 10;
-        while (len > 0) {
-            repository.save(build(UUID.randomUUID(), len));
-            len--;
-        }
-
         Stream<Widget> result = repository.getWidgetsWithZIndexGreaterThanOrEqualTo(4);
 
         Integer[] zIndexes = new Integer[] { 4, 5, 6, 7, 8, 9, 10 };
@@ -98,12 +120,6 @@ public class InMemoryWidgetRepositoryTest {
 
     @Test
     void givenInitializedRepository_whenGetForeground_thenReturnWidgetWithGreaterZIndex() {
-        int len = 10;
-        while (len > 0) {
-            repository.save(build(UUID.randomUUID(), len));
-            len--;
-        }
-
         Optional<Widget> opWidget = repository.getForegroundWidget();
 
         assertEquals(true, opWidget.isPresent());
@@ -111,13 +127,15 @@ public class InMemoryWidgetRepositoryTest {
     }
 
     @Test
-    void givenNotInitializedRepository_whenGetForeground_thenReturnEmpty() {
+    void givenEmptyRepository_whenGetForeground_thenReturnEmptyOptional() {
+        jpaRepo.deleteAll();
         Optional<Widget> opWidget = repository.getForegroundWidget();
         assertEquals(false, opWidget.isPresent());
     }
 
     @Test
     void givenExistingZIndex_whenGetByZIndex_thenReturnWidget() {
+        jpaRepo.deleteAll();
         UUID id = UUID.randomUUID();
         repository.save(build(UUID.randomUUID(), 9));
         repository.save(build(id, 10));
@@ -131,20 +149,8 @@ public class InMemoryWidgetRepositoryTest {
 
     @Test
     void givenNonExistingZIndex_whenGetByZIndex_thenEmpty() {
-        Optional<Widget> opWidget = repository.getByZIndex(10);
+        Optional<Widget> opWidget = repository.getByZIndex(50);
         assertEquals(false, opWidget.isPresent());
     }
 
-    @Test
-    void givenId_whenDelete_thenRemoveWidgetFromDb() {
-        UUID id = UUID.randomUUID();
-        repository.save(build(id, 10));
-
-        repository.delete(UUID.randomUUID());
-        assertEquals(id, repository.getById(id).get().getId());
-
-        repository.delete(id);
-        Optional<Widget> opWidget = repository.getById(UUID.randomUUID());
-        assertEquals(false, opWidget.isPresent());
-    }
 }

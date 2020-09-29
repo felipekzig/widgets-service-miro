@@ -2,6 +2,7 @@ package com.felipekzig.widget.domain.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,6 +16,14 @@ import com.felipekzig.widget.domain.vo.Coordinates;
 import org.junit.jupiter.api.Test;
 
 public class WidgetTest {
+
+    @Test
+    void givenTwoWidgets_whenCheckinEquality_thenReturn() {
+        Widget w1 = Widget.builder().coords(new Coordinates(10, 10)).width(100).height(40).build();
+        Widget w2 = Widget.builder().coords(new Coordinates(10, 10)).width(100).height(40).build();
+
+        assertNotEquals(w1, w2);
+    }
 
     @Test
     void givenDefaultAttributes_whenBuild_thenReturnWidget() {

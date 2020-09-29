@@ -26,23 +26,26 @@ public class WidgetController {
     private WidgetService service;
 
     @PostMapping("/widgets")
-    public ResponseEntity<Widget> create(@RequestBody Widget resource) {
-        Widget createdWidget = service.create(resource);
-        return ResponseEntity.created(URI.create("/widget/" + createdWidget.getId())).body(createdWidget);
+    public ResponseEntity<WidgetDTO> create(@RequestBody WidgetDTO dto) {
+        Widget createdWidget = service.create(dto.toEntity());
+        return ResponseEntity.created(URI.create("/widget/" + createdWidget.getId()))
+                .body(WidgetDTO.fromEntity(createdWidget));
     }
 
     @PutMapping("/widgets/{uuid}")
-    public ResponseEntity<Widget> update(@PathVariable("uuid") UUID uuid, @RequestBody Widget widget) {
-        // widget.setId(uuid);
-        Widget updatedWidget = service.update(uuid, widget);
-
-        return ResponseEntity.ok(updatedWidget);
+    public ResponseEntity<Object> update(@PathVariable("uuid") UUID uuid, @RequestBody WidgetDTO dto) {
+        try {
+            Widget updatedWidget = service.update(uuid, dto.toEntity());
+            return ResponseEntity.ok(WidgetDTO.fromEntity(updatedWidget));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/widgets/{uuid}")
-    public ResponseEntity<Widget> delete(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<String> delete(@PathVariable("uuid") UUID uuid) {
         service.delete(uuid);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("OK");
     }
 
     @GetMapping("/widgets")
@@ -52,13 +55,13 @@ public class WidgetController {
     }
 
     @GetMapping("/widgets/{uuid}")
-    public ResponseEntity<Widget> getById(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<WidgetDTO> getById(@PathVariable("uuid") UUID uuid) {
         Optional<Widget> widget = service.getById(uuid);
 
         if (!widget.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(widget.get());
+        return ResponseEntity.ok(WidgetDTO.fromEntity(widget.get()));
     }
 
 }
