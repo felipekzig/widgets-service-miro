@@ -5,6 +5,6 @@ RUN mvn clean package
 
 FROM openjdk:11
 WORKDIR /app
-COPY --from=build /app/target/app-latest.jar /app/app-latest.jar
+COPY --from=build /app/target/com.felipekzig.widget.jar /app/com.felipekzig.widget.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app-latest.jar"]
+ENTRYPOINT ["java", "-jar", "/app/com.felipekzig.widget.jar"]
