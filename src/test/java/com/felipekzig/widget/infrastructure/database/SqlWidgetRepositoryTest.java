@@ -73,7 +73,7 @@ public class SqlWidgetRepositoryTest {
         assertArrayEquals(zIndexes, result.stream().map(w -> w.getZIndex()).toArray());
     }
 
-    // @Test
+    @Test
     void givenFilteredCoordinates_whenList_thenReturnFilteredPageResulst() {
         jpaRepo.deleteAll();
 

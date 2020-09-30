@@ -5,12 +5,16 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import com.felipekzig.widget.domain.entity.Widget;
 import com.felipekzig.widget.domain.repository.WidgetRepository;
 import com.felipekzig.widget.domain.vo.Coordinates;
 
+import org.hibernate.query.criteria.internal.ParameterRegistry;
+import org.hibernate.query.criteria.internal.compile.RenderingContext;
+import org.hibernate.query.criteria.internal.expression.ExpressionImpl;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -97,17 +101,31 @@ public class SqlWidgetRepository implements WidgetRepository {
 
     // JPA Specs for filtering
     private static Specification<Widget> greaterThanOrEqualToCoord(Coordinates coord) {
+
         return (root, query, builder) -> {
-            Predicate predicateX = builder.greaterThanOrEqualTo(root.get(COORDS_FIELD).get("x"), coord.getX());
-            Predicate predicateY = builder.greaterThanOrEqualTo(root.get(COORDS_FIELD).get("y"), coord.getY());
+            Expression<Integer> coordX = root.get(COORDS_FIELD).get("x");
+            Expression<Integer> coordY = root.get(COORDS_FIELD).get("y");
+
+            Expression<Integer> expX = builder.diff(coordX, builder.quot(root.get("width"), 2)).as(Integer.class);
+            Expression<Integer> expY = builder.diff(coordY, builder.quot(root.get("height"), 2)).as(Integer.class);
+
+            Predicate predicateX = builder.greaterThanOrEqualTo(expX, coord.getX());
+            Predicate predicateY = builder.greaterThanOrEqualTo(expY, coord.getY());
             return builder.and(predicateX, predicateY);
         };
     }
 
     private static Specification<Widget> lessThanOrEqualToCoord(Coordinates coord) {
         return (root, query, builder) -> {
-            Predicate predicateX = builder.lessThanOrEqualTo(root.get(COORDS_FIELD).get("x"), coord.getX());
-            Predicate predicateY = builder.lessThanOrEqualTo(root.get(COORDS_FIELD).get("y"), coord.getY());
+            Expression<Integer> coordX = root.get(COORDS_FIELD).get("x");
+            Expression<Integer> coordY = root.get(COORDS_FIELD).get("y");
+
+            Expression<Integer> expX = builder.sum(coordX, builder.quot(root.get("width"), 2)).as(Integer.class);
+            Expression<Integer> expY = builder.sum(coordY, builder.quot(root.get("height"), 2)).as(Integer.class);
+
+            Predicate predicateX = builder.lessThanOrEqualTo(expX, coord.getX());
+            Predicate predicateY = builder.lessThanOrEqualTo(expY, coord.getY());
+
             return builder.and(predicateX, predicateY);
         };
     }
